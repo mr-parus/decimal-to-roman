@@ -3,8 +3,8 @@ import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { configureApp } from '../src/core/utils/configs.util';
 import {
-  MAX_DECIMAL_FOR_ROMAN,
-  MIN_DECIMAL_FOR_ROMAN,
+  MAX_ROMAN_IN_DECIMAL,
+  MIN_ROMAN_IN_DECIMAL,
 } from '../src/math/constatns';
 import { MathModule } from '../src/math/math.module';
 
@@ -50,7 +50,7 @@ describe('MathController (e2e)', () => {
         .expect(({ body }) => {
           expect(body).toEqual({
             statusCode: 400,
-            message: [`decimal must not be less than ${MIN_DECIMAL_FOR_ROMAN}`],
+            message: [`decimal must not be less than ${MIN_ROMAN_IN_DECIMAL}`],
             error: 'Bad Request',
           });
         });
@@ -66,7 +66,7 @@ describe('MathController (e2e)', () => {
         .expect(({ body }) => {
           expect(body).toEqual({
             statusCode: 400,
-            message: [`decimal must not be less than ${MIN_DECIMAL_FOR_ROMAN}`],
+            message: [`decimal must not be less than ${MIN_ROMAN_IN_DECIMAL}`],
             error: 'Bad Request',
           });
         });
@@ -82,14 +82,14 @@ describe('MathController (e2e)', () => {
         .expect(({ body }) => {
           expect(body).toEqual({
             statusCode: 400,
-            message: [`decimal must not be less than ${MIN_DECIMAL_FOR_ROMAN}`],
+            message: [`decimal must not be less than ${MIN_ROMAN_IN_DECIMAL}`],
             error: 'Bad Request',
           });
         });
     });
 
     it('should respond with 400 when `decimal` is bigger then max', () => {
-      const payload = { decimal: MAX_DECIMAL_FOR_ROMAN + 1 };
+      const payload = { decimal: MAX_ROMAN_IN_DECIMAL + 1 };
 
       return request(app.getHttpServer())
         .post('/math/decimal-to-roman')
@@ -98,7 +98,7 @@ describe('MathController (e2e)', () => {
         .expect(({ body }) => {
           expect(body).toEqual({
             statusCode: 400,
-            message: [`decimal must not be greater than ${MAX_DECIMAL_FOR_ROMAN}`],
+            message: [`decimal must not be greater than ${MAX_ROMAN_IN_DECIMAL}`],
             error: 'Bad Request',
           });
         });
