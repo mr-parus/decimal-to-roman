@@ -12,8 +12,6 @@ import {
   timeout,
 } from 'rxjs';
 
-const API_BASE_URL = 'http://localhost:3000/api';
-
 export interface DecimalToRomanConvertable {
   convertDecimalToRoman(decimal: number): Promise<string>;
 }
@@ -49,7 +47,7 @@ export class ConversionService implements DecimalToRomanConvertable {
   private async createConversionTask(decimal: number): Promise<void> {
     let response;
     try {
-      response = await fetch(API_BASE_URL + '/tasks', {
+      response = await fetch('/api/tasks', {
         method: 'POST',
         mode: 'cors',
         headers: {
@@ -72,7 +70,7 @@ export class ConversionService implements DecimalToRomanConvertable {
   }
 
   private initSse(): void {
-    const emitter = new EventSource(API_BASE_URL + '/tasks');
+    const emitter = new EventSource('/api/tasks');
     const connect$ = fromEvent<MessageEvent>(emitter, 'connect');
     const message$ = fromEvent<MessageEvent>(emitter, 'message');
 
