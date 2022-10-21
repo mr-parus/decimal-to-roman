@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
-import { configureApp } from '../src/core/utils/configs.util';
+import { configureApp } from '../src/math/utils/configs.util';
 import {
   MAX_ROMAN_IN_DECIMAL,
   MIN_ROMAN_IN_DECIMAL,
@@ -24,11 +24,13 @@ describe('MathController (e2e)', () => {
   });
 
   describe('/api/math/decimal-to-roman (POST)', () => {
+    const TEST_URL = '/api/math/decimal-to-roman';
+
     it('should respond with 400 when `decimal` is missing', () => {
       const payload = {};
 
       return request(app.getHttpServer())
-        .post('/math/decimal-to-roman')
+        .post(TEST_URL)
         .send(payload)
         .expect(400)
         .expect(({ body }) => {
@@ -44,7 +46,7 @@ describe('MathController (e2e)', () => {
       const payload = { decimal: -10 };
 
       return request(app.getHttpServer())
-        .post('/math/decimal-to-roman')
+        .post(TEST_URL)
         .send(payload)
         .expect(400)
         .expect(({ body }) => {
@@ -60,7 +62,7 @@ describe('MathController (e2e)', () => {
       const payload = { decimal: 0 };
 
       return request(app.getHttpServer())
-        .post('/math/decimal-to-roman')
+        .post(TEST_URL)
         .send(payload)
         .expect(400)
         .expect(({ body }) => {
@@ -76,7 +78,7 @@ describe('MathController (e2e)', () => {
       const payload = { decimal: 4000 };
 
       return request(app.getHttpServer())
-        .post('/math/decimal-to-roman')
+        .post(TEST_URL)
         .send(payload)
         .expect(400)
         .expect(({ body }) => {
@@ -92,13 +94,15 @@ describe('MathController (e2e)', () => {
       const payload = { decimal: MAX_ROMAN_IN_DECIMAL + 1 };
 
       return request(app.getHttpServer())
-        .post('/math/decimal-to-roman')
+        .post(TEST_URL)
         .send(payload)
         .expect(400)
         .expect(({ body }) => {
           expect(body).toEqual({
             statusCode: 400,
-            message: [`decimal must not be greater than ${MAX_ROMAN_IN_DECIMAL}`],
+            message: [
+              `decimal must not be greater than ${MAX_ROMAN_IN_DECIMAL}`,
+            ],
             error: 'Bad Request',
           });
         });
@@ -108,7 +112,7 @@ describe('MathController (e2e)', () => {
       const payload = { decimal: 'not a number' };
 
       return request(app.getHttpServer())
-        .post('/math/decimal-to-roman')
+        .post(TEST_URL)
         .send(payload)
         .expect(400)
         .expect(({ body }) => {
@@ -124,7 +128,7 @@ describe('MathController (e2e)', () => {
       const payload = { decimal: 5.5 };
 
       return request(app.getHttpServer())
-        .post('/math/decimal-to-roman')
+        .post(TEST_URL)
         .send(payload)
         .expect(400)
         .expect(({ body }) => {
