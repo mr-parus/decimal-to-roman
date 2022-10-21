@@ -5,6 +5,7 @@ export interface DecimalToRomanConvertable {
 }
 
 export class ConversionService implements DecimalToRomanConvertable {
+  // ℹ️ Cache prevents from sending unnecessary requests to API
   private cache = new Map();
 
   async convertDecimalToRoman(decimal: number): Promise<string> {

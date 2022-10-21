@@ -3,13 +3,17 @@ import { delay, from, Subscription } from 'rxjs';
 import { ConvertorParams } from './Convertor.types';
 
 export const DEFAULT_HINT = 'Enter a valid decimal ⤵';
+export const CONVERSION_DELAY = 100;
 
+// ℹ️ SOLID Design Principle: Dependency Inversion
+// Convertor component relays on the DecimalToRomanConvertable interface abstraction
+// but not on the ConversionService implementation
 export function Convertor({ conversionService }: ConvertorParams) {
   const [romanOutput, setRomanOutput] = useState<string>(DEFAULT_HINT);
   const [decimalInput, setDecimalInput] = useState<string>('');
   const conversionSubscription = useRef<Subscription>();
 
-  const convert = (value: string) => {
+  const convert = (value: string): void => {
     if (conversionSubscription.current) conversionSubscription.current?.unsubscribe();
 
     const decimal = parseInt(value);
@@ -19,7 +23,7 @@ export function Convertor({ conversionService }: ConvertorParams) {
 
     setRomanOutput('Converting ...');
     conversionSubscription.current = from(conversionService.convertDecimalToRoman(decimal))
-      .pipe(delay(200))
+      .pipe(delay(CONVERSION_DELAY))
       .subscribe({
         error: error => setRomanOutput(`╳ Failed to convert. ${error.message}`),
         next: setRomanOutput,
@@ -33,8 +37,8 @@ export function Convertor({ conversionService }: ConvertorParams) {
 
   return (
     <div className="container">
-      <b>{romanOutput}</b>
-      <input value={decimalInput} onChange={onChange} type="number" min="1" />
+      <b data-testid="roman-output">{romanOutput}</b>
+      <input value={decimalInput} onChange={onChange} data-testid="decimal-input" type="number" min="1" />
     </div>
   );
 }

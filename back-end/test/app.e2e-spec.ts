@@ -23,7 +23,7 @@ describe('MathController (e2e)', () => {
     await app.init();
   });
 
-  describe('/math/decimal-to-roman (POST)', () => {
+  describe('/api/math/decimal-to-roman (POST)', () => {
     it('should respond with 400 when `decimal` is missing', () => {
       const payload = {};
 
