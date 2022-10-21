@@ -1,7 +1,10 @@
 import { Module } from '@nestjs/common';
 import { MathController } from './controllers/math.controller';
+import { TasksController } from './controllers/tasks.controller';
+import { SseService } from './services/sse.service';
 
 @Module({
-  controllers: [MathController],
+  providers: [SseService],
+  controllers: [MathController, TasksController],
 })
 export class MathModule {}

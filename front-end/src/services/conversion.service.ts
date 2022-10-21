@@ -1,3 +1,17 @@
+import {
+  BehaviorSubject,
+  EMPTY,
+  filter,
+  firstValueFrom,
+  from,
+  fromEvent,
+  map,
+  merge,
+  Subject,
+  switchMap,
+  timeout,
+} from 'rxjs';
+
 const API_BASE_URL = 'http://localhost:3000/api';
 
 export interface DecimalToRomanConvertable {
@@ -7,42 +21,67 @@ export interface DecimalToRomanConvertable {
 export class ConversionService implements DecimalToRomanConvertable {
   // ℹ️ Cache prevents from sending unnecessary requests to API
   private cache = new Map();
+  private clientId$ = new BehaviorSubject<string>('');
+  private conversionResults$ = new Subject<{ roman: string; decimal: number }>();
+
+  constructor() {
+    this.initSse();
+  }
 
   async convertDecimalToRoman(decimal: number): Promise<string> {
     const valueFromCache = this.cache.get(decimal);
     if (valueFromCache !== undefined) return valueFromCache;
 
-    const result = await this.scheduleConversion(decimal);
+    const startConversionTask$ = from(this.createConversionTask(decimal)).pipe(switchMap(() => EMPTY));
+    const getConversionResults$ = this.conversionResults$.asObservable().pipe(
+      timeout(5000),
+      filter(({ decimal: currentDecimal }) => decimal === currentDecimal),
+      map(({ roman }) => roman),
+    );
+
+    const result = await firstValueFrom(merge(startConversionTask$, getConversionResults$));
 
     this.cache.set(decimal, result);
 
     return result;
   }
 
-  async scheduleConversion(decimal: number): Promise<string> {
+  private async createConversionTask(decimal: number): Promise<void> {
     let response;
     try {
-      response = await fetch(API_BASE_URL + '/math/decimal-to-roman', {
+      response = await fetch(API_BASE_URL + '/tasks', {
         method: 'POST',
         mode: 'cors',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ decimal }),
+        body: JSON.stringify({
+          decimal,
+          clientId: this.clientId$.value,
+        }),
       });
     } catch (error) {
       throw new Error('AJAX request failed');
     }
 
-    const isJson = response.headers.get('content-type')?.includes('application/json');
-    if (!isJson) throw new Error(`Invalid response format ${response.headers.get('content-type')}`);
-
     const body = await response.json();
 
     if (body.message) {
-      return body.message.toString();
+      throw new Error(body.message);
     }
+  }
 
-    return body.result.roman;
+  private initSse(): void {
+    const emitter = new EventSource(API_BASE_URL + '/tasks');
+    const connect$ = fromEvent<MessageEvent>(emitter, 'connect');
+    const message$ = fromEvent<MessageEvent>(emitter, 'message');
+
+    connect$.subscribe(({ data: clientId }) => this.clientId$.next(clientId));
+    message$
+      .pipe(
+        map(event => event.data),
+        map(data => JSON.parse(data)),
+      )
+      .subscribe(({ roman, decimal }) => this.conversionResults$.next({ roman, decimal }));
   }
 }

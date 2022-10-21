@@ -1,9 +1,8 @@
 import React, { useRef, useState } from 'react';
-import { delay, from, Subscription } from 'rxjs';
+import { from, Subscription } from 'rxjs';
 import { ConvertorParams } from './Convertor.types';
 
 export const DEFAULT_HINT = 'Enter a valid decimal ⤵';
-export const CONVERSION_DELAY = 100;
 
 // ℹ️ SOLID Design Principle: Dependency Inversion
 // Convertor component relays on the DecimalToRomanConvertable interface abstraction
@@ -22,12 +21,10 @@ export function Convertor({ conversionService }: ConvertorParams) {
     }
 
     setRomanOutput('Converting ...');
-    conversionSubscription.current = from(conversionService.convertDecimalToRoman(decimal))
-      .pipe(delay(CONVERSION_DELAY))
-      .subscribe({
-        error: error => setRomanOutput(`╳ Failed to convert. ${error.message}`),
-        next: setRomanOutput,
-      });
+    conversionSubscription.current = from(conversionService.convertDecimalToRoman(decimal)).subscribe({
+      error: error => setRomanOutput(`╳ Failed to convert. ${error.message}`),
+      next: setRomanOutput,
+    });
   };
 
   const onChange = ({ currentTarget: { value } }: React.FormEvent<HTMLInputElement>) => {

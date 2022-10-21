@@ -1,7 +1,7 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { wait } from '@testing-library/user-event/dist/utils';
 import React from 'react';
-import { CONVERSION_DELAY, Convertor, DEFAULT_HINT } from './Convertor';
+import { Convertor, DEFAULT_HINT } from './Convertor';
 
 describe('Convertor component', () => {
   const mockConversionService = {
@@ -16,7 +16,12 @@ describe('Convertor component', () => {
 
   it('should convert the decimal to roman', async () => {
     const EXPECTED_ROMAN = 'X';
-    jest.spyOn(mockConversionService, 'convertDecimalToRoman').mockReturnValue(EXPECTED_ROMAN);
+    const CONVERSION_DELAY = 100;
+
+    jest.spyOn(mockConversionService, 'convertDecimalToRoman').mockImplementation(async () => {
+      await wait(CONVERSION_DELAY);
+      return EXPECTED_ROMAN;
+    });
 
     render(<Convertor conversionService={mockConversionService} />);
 
