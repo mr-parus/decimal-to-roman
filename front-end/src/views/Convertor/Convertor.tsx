@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { from, Subscription } from 'rxjs';
+import { isInt } from '../../utils/math.util';
 import { ConvertorParams } from './Convertor.types';
 
 export const DEFAULT_HINT = 'Enter a valid decimal ⤵';
@@ -15,8 +16,8 @@ export function Convertor({ conversionService }: ConvertorParams) {
   const convert = (value: string): void => {
     if (conversionSubscription.current) conversionSubscription.current?.unsubscribe();
 
-    const decimal = parseInt(value);
-    if (!isFinite(decimal)) {
+    const decimal = parseFloat(value);
+    if (!isInt(decimal)) {
       return setRomanOutput(DEFAULT_HINT);
     }
 
